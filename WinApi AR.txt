@@ -1,0 +1,53 @@
+WinApi AR
+
+기본(1)
+
+HINSTANCE hInstance : 실행 된 프로세스의 시작 주소
+
+리소스 뷰 - 스트링테이블 - IDS_APP_TITLE, IDC_WINAPIAR 등을
+LoadStringW 에서 전역 문자열 초기화 IDS_APP_TITLE -> szTitle
+
+프로세스 = 윈도우 가 아님
+윈도우는 인터페이스 역할, 프로세스는 윈도우를 가질 수도, 아닐 수도 있음
+하나의 프로세스에서 여러개의 창을 띄울 수도 있음 ex) 창 띄우고 도움말 창까지
+
+MyRegisterClass : 창 클래스 등록, 값 세팅
+- 함수포인터 lpfnWndProc  = WndProc; <- 콜백함수 WndProc
+
+Accel table - 단축키 등록
+ Alt + ? -> 도움말(정보)
+ Alt + / -> 
+
+
+기본 메세지 루프
+- 메세지 큐 
+   &msg로 메세지를 받아 처리 (msg.message, msg.time, msg.lParap, msg.pt 등등)을 큐에서 꺼내 채워줌
+   TranslateMessage, DispatchMessge 로 처리
+   msg.hwnd - 메세지가 발생한 윈도우 
+   들어온 메세지를 분석(translate)하고 (단축키인지 확인도 하고) -> 관련 처리기 쪽으로 보냄(dispatch)
+   -> WndProc가 호출되고 메세지가 어떤 지에 따라 분기처리(switch), 윈도우메세지가 너무 많기 떄문에 모든 메세지를 처리할 순없음
+   -> DefWindowProc(디폴트)를 통해서 처리
+
+   GetMessage - 메세지큐에서 메세지를 확인할 때 가지 대기
+   GetMessage에서 false를 반환하는 경우 - WM_QUIT일 때 -> while문 종료 -> 프로그램 종료
+
+   메세지 반응 형태이기 때문에 게임개발에 부적합
+   - 이유 : 
+   
+
+   -> 구조 변경할 예정
+
+
+기본(2)
+
+복습내용
+
+WinMain : 윈도우 생성 - 반복문 돌며 메세지확인, 처리
+	ex) WM_PAINT 메세지가 들어오면 그리기 작업
+	  WM_PAINT 가 발생해야 하는 상황 -> 윈도우의 무효화 영역이 발생한 경우 
+	  (invalidate Rect) :
+	  인터넷 설명 : 윈도우가 다른 창에 가려졌다가 다시 포커스 <- 가려졌던 부분이 무효화 영역
+	  정말 그러한가? -> but 디버그 해보니 호출 안 됨 / 그런데 창을 최소화 했다가 다시 키면 발생
+	  * 가려졌던 부분이 무효화영역이라는 것은 오래된 설명
+	   화면에 가려진 부분은 비트맵형태로 데이터를 가지고 있기 때문에 현재는 맞지 않는 설명
+
