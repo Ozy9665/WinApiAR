@@ -18,6 +18,15 @@ Accel table - 단축키 등록
  Alt + ? -> 도움말(정보)
  Alt + / -> 
 
+함수: WndProc(HWND, UINT, WPARAM, LPARAM)
+
+용도: 주 창의 메시지를 처리합니다.
+
+WM_COMMAND  - 애플리케이션 메뉴를 처리합니다.
+WM_PAINT    - 주 창을 그립니다.
+WM_DESTROY  - 종료 메시지를 게시하고 반환합니다.
+
+
 
 기본 메세지 루프
 - 메세지 큐 
@@ -50,4 +59,69 @@ WinMain : 윈도우 생성 - 반복문 돌며 메세지확인, 처리
 	  정말 그러한가? -> but 디버그 해보니 호출 안 됨 / 그런데 창을 최소화 했다가 다시 키면 발생
 	  * 가려졌던 부분이 무효화영역이라는 것은 오래된 설명
 	   화면에 가려진 부분은 비트맵형태로 데이터를 가지고 있기 때문에 현재는 맞지 않는 설명
+
+
+윈도우를 구성하는 최소한의 정보들이 있음 - CreateWindow를 통해 만듬
+동작
+OS가 관리하는 커널오브젝트들은 ID를제공. -> 그 값(핸들)으로 ShowWindow등 제공된 함수,아이디 이용
+
+HDC hde // Device Context (커널)(그리기 관련)
+* DC(Device Context)를 만들때는 윈도우(목적지)를 알려줌(hWnd)
+Device Context란?(장치 컨텍스트)
+화면에 그리기 동작을 할 수 있게 그리기 작업을 하는데 필요한 데이터 들의 집합체 (펜,브러시,)
+=> 뭔가를 그릴 땐 항상 DC이용 : 그 안에 있는 펜 정보, 브러시 정보등을 이용하여 그리겠다.
+(디폴트 : 검은색 펜, 하얀색 브러시)
+
+
+
+
+HDC, HWND 와 같은 애들의 자료형 : DECLARE_HANDLE이라는 전처리기 : 구조체,멤버로 인트가 하나 들어있음 
+=> 전처리기에 의해서 HDC{int a;} typedef HDC 와 같은 형식
+=> int하난데 굳이 구조체를? => 
+=> HDC.HWND,HBRUSH등 다양하게 하는 이유? => 다 같은 커널오브젝트지만 종류가 완전히 다름 (윈도우, 펜, 브러쉬, DC) => 통일하지 않고 구분
+* H 붙으면 id라는 뜻
+
+
+
+*픽셀 하나당 R,G,B 1바이트 씩 총 3바이트 / 1920x1080 = 6,220,800 바이트 = 약 6MB
+ 0~255중 0,0,0 : 검은색
+
+
+
+----4강 윈도우이벤트(2)---
+직접 펜을 만들어서 DC에 지급하는 방법
+HPEN hRedPen = CreatePen(스타일,폭,색상);	// 스타일은 MS 레퍼런스 참고
+HPEN hDefaultPen = (HPEN)SelectObject(hdc, hRedPen);
+* 왜 굳이 HPEN 캐스팅이 필요한 구조인지? => SelectObject함수는 범용적인 함수이기 때문(펜, 브러쉬등 용도에 따라)
+
+
+Create 말고 GetStockObject도 가능(자주쓰는 애들을 가져다쓰는 함수)
+	브러쉬 : 검정,회색, 어두은 회색, 투명한브러쉬, 하양
+	펜 : 검,하 등등
+*Create한게 아니니 삭제도 x
+
+만든다면 CreateSolidBrush(색상) 사용
+
+WM_KEYDOWN : 키 정보 - wParam으로 들어옴	/ 마우스는 lParam
+							lParam의 자료형 LONG_PTR : long자료형 (4바이트 정수) / 2바이트 씩 좌표받을 수 있음(LOWORD HIWORD)
+
+
+이동 시키려면 WM_PAINT에서 고정된 위치(상수)로 그리면 안됨
+
+POINT : x,y로 구성된 구조체
+
+WM_KEYDOWN 에서 switch문을 이용해 VK_UP, DOWN 등 활용
+좌표를 바꿔줬으면 다시 그려주는 작업 필요함
+
+윈도우는 무효화영역 발생 시 WM_PAINT 를 발생시킴
+하는 점을 이용한 
+InvalidateRect(윈도우, 영역(nullptr은 전체), bErase)으로 무효화 영역발생 => 다시 그려주기 
+
+bErase 를 false로 할 시 이전 그림이 남아있음
+true로 이전 그림 지우기=>InvalidateRect(hWnd, nullptr, true);
+
+여기까지만 했을 때는 꾹 눌렀을 때 한 템포 느림
+
+다음시간 : 조작 + 물체여러개
+
 
