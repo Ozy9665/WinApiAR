@@ -1,8 +1,10 @@
 ﻿// WinApiAR.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 
+#include "pch.h"
 #include "framework.h"
 #include "WinApiAR.h"
+#include "CCore.h"
 
 #define MAX_LOADSTRING 100
 
@@ -18,6 +20,37 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
+// 지역
+// 전역
+// 정적 (데이터 영역)
+// 1. 함수 안에 선언될 때 - 함수 호출, 종료와 삭제 별개 
+// 2. 파일안에 선언될 때 - 파일안에서만 접근가능 - 이름중복규칙 적용x
+// 3. 클래스 안에 : 클래스객체의 생성, 해제와 상관없이 정적멤버는 데이터 영역에 하나 있음, 클래스 내에서만 접근가능
+// 외부
+
+class CClass
+{
+private:
+    int m_i;
+public:
+    static int m_iStatic; // 정적 멤버 ( 데이터 ) 
+public:
+    void func()
+    {
+        this->m_i; 
+        m_iStatic = 0;
+    }
+
+    // 정적 멤버함수. 객체없이 호출 가능. this가 없다(멤버 접근 불가), static키워드가 붙은 정적 멤버는 접근 가능
+    static void FUNC()
+    {
+        m_iStatic = 0;
+    }
+};
+
+int CClass::m_iStatic = 0;
+
+
 // SAL
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -29,15 +62,27 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // TODO: 여기에 코드를 입력합니다.
 
+
+
+
+
     // 전역 문자열을 초기화합니다.
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
     LoadStringW(hInstance, IDC_WINAPIAR, szWindowClass, MAX_LOADSTRING);
     // 윈도우 정보 등록
     MyRegisterClass(hInstance);
 
-    // 애플리케이션 초기화를 수행합니다:
+    // 윈도우 생성
     if (!InitInstance (hInstance, nCmdShow))
     {
+        return FALSE;
+    }
+
+    // Core 초기화
+    if (FAILED(CCore::GetInst()->init(g_hWnd, POINT{1280, 768})))
+    {
+        MessageBox(nullptr, L"Core 객체 초기화 실패", L"ERROR", MB_OK);
+
         return FALSE;
     }
 
@@ -76,6 +121,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             // Game 코드 수행
             // 디자인 패턴(설계 유형)
             // 싱글톤 패턴
+            CCore::GetInst()->progress();
         }
     }
     return (int) msg.wParam;
