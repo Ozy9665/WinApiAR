@@ -13,14 +13,13 @@ public:
 	void SetName(const wstring& _strName) { m_strName = _strName; }
 	const wstring& GetName() { return m_strName; }
 
-
 	void update();
 	void render(HDC _dc);
 
 	virtual void Enter() = 0;	// 해당 Scene에 진입 시 호출
 	virtual void Exit() = 0;	// 해당 Scene을 탈출 시 호출
 
-protected:
+public:
 	void AddObject(CObject* _pObj, GROUP_TYPE _eType)
 	{
 		m_arrObj[(UINT)_eType].push_back(_pObj);
