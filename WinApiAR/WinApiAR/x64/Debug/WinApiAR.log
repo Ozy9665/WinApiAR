@@ -1,2 +1,6 @@
 ﻿  CCore.cpp
+  CKeyMgr.cpp
+  CObject.cpp
+  CTimeMgr.cpp
+  main.cpp
   WinApiAR.vcxproj -> C:\Users\ozy96\OneDrive\문서\GitHub\WinApiAR\WinApiAR\x64\Debug\WinApiAR.exe

@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "CCore.h"
 
+#include "CTimeMgr.h"
+#include "CKeyMgr.h"
+
 #include"CObject.h"
 
 
@@ -34,9 +37,12 @@ int CCore::init(HWND _hWnd, POINT _ptResolution)
 
 	m_hDC = GetDC(m_hWnd);
 
+	// Manager 초기화
+	CTimeMgr::GetInst()->init();
+	CKeyMgr::GetInst()->init();
 
-	g_obj.m_ptPos = POINT{ m_ptResolution.x / 2, m_ptResolution.y / 2 };
-	g_obj.m_ptScale = POINT{ 100, 100 };
+	g_obj.SetPos(Vec2( (float)(m_ptResolution.x / 2), (float)(m_ptResolution.y / 2) ));
+	g_obj.SetScale(Vec2(100, 100 ));
 
 	return S_OK;
 }
@@ -44,16 +50,8 @@ int CCore::init(HWND _hWnd, POINT _ptResolution)
 
 void CCore::progress()
 {
-	static int callcount = 0;
-	++callcount;
-
-	static int iPrevCount = GetTickCount();
-	int iCurCount = GetTickCount();
-	if (iCurCount - iPrevCount > 1000)
-	{
-		iPrevCount = iCurCount;
-		callcount = 0;
-	}
+	// Manager Update
+	CTimeMgr::GetInst()->update();
 
 	update();
 
@@ -64,22 +62,28 @@ void CCore::progress()
 
 void CCore::update()
 {
+	Vec2 vPos = g_obj.GetPos();
 	if (GetAsyncKeyState(VK_LEFT) & 0x8000)
 	{
-		g_obj.m_ptPos.x -= 1;
+		vPos.x -= 200.f * CTimeMgr::GetInst()->GetfDT();
 	}
 
 	if (GetAsyncKeyState(VK_RIGHT) & 0x8000)
 	{
-		g_obj.m_ptPos.x += 1;
+		vPos.x += 200.f * CTimeMgr::GetInst()->GetfDT();
 	}
+
+	g_obj.SetPos(vPos);
 }
 
 void CCore::render()
 {
 	// 그리기
-	Rectangle(m_hDC, g_obj.m_ptPos.x - g_obj.m_ptScale.x / 2,
-					 g_obj.m_ptPos.y - g_obj.m_ptScale.y / 2,
-					 g_obj.m_ptPos.x + g_obj.m_ptScale.x / 2,
-					 g_obj.m_ptPos.y + g_obj.m_ptScale.y / 2);
-}
+	Vec2 vPos = g_obj.GetPos();
+	Vec2 vScale = g_obj.GetScale();
+
+	Rectangle(m_hDC, int(vPos.x - vScale.x / 2.f),
+					 int(vPos.y - vScale.y / 2.f),
+					 int(vPos.x + vScale.x / 2.f),
+					 int(vPos.y + vScale.y / 2.f));
+}					 
