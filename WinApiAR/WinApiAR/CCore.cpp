@@ -60,7 +60,6 @@ void CCore::progress()
 	// Manager Update
 	CTimeMgr::GetInst()->update();
 	CKeyMgr::GetInst()->update();
-
 	CSceneMgr::GetInst()->update();
 
 	// =========
